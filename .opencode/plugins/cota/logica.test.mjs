@@ -172,3 +172,36 @@ test("model.resolve desvia modelo bloqueado apenas dentro do mesmo provider", as
   assert.ok(bloqueadoAte(new Map([["opencode/gpt-6-luna", futuro]]), modeloPago, Date.now()) > 0)
   assert.equal(bloqueadoAte(new Map([["opencode/gpt-6-luna", 1]]), modeloPago, Date.now()), 0)
 })
+
+test("retry com cota e falha no switchModel: aviso específico, sem 'Sem fallback'", async (t) => {
+  ambiente(t, { MULTIAGENTE_COTA_FALLBACKS: "opencode/gpt-6-luna>opencode/hy4-flash-free" })
+  const hooks = {}
+  const chamadas = []
+  const ctx = {
+    storage: {
+      get: async () => ({}),
+      set: async (chave, valor) => chamadas.push(["storage", chave, valor]),
+    },
+    session: {
+      hook: async (nome, fn) => { hooks[nome] = fn; return { dispose: async () => {} } },
+      switchModel: async () => { throw new Error("switch falhou") },
+      synthetic: async (input) => chamadas.push(["synthetic", input.text]),
+    },
+  }
+  await plugin.setup(ctx)
+  const evento = {
+    sessionID: "s9",
+    model: { ...modeloPago },
+    error: erroCota,
+    decision: { retry: true, delay: 0 },
+  }
+  await hooks.retry(evento)
+  assert.deepEqual(evento.decision, { retry: false })
+  const avisos = chamadas.filter((c) => c[0] === "synthetic").map((c) => c[1])
+  assert.equal(avisos.length, 1)
+  assert.match(avisos[0], /Falha ao trocar para opencode\/hy4-flash-free/)
+  assert.match(avisos[0], /switch falhou/)
+  assert.doesNotMatch(avisos[0], /Sem fallback disponível/)
+  const storage = chamadas.find((c) => c[0] === "storage")
+  assert.ok(storage[2]["opencode/gpt-6-luna"] > Date.now())
+})

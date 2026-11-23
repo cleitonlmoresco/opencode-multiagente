@@ -101,6 +101,13 @@ export default {
           return
         } catch (erro) {
           console.error("[cota] não foi possível trocar o modelo:", erro)
+          await avisar(
+            event.sessionID,
+            `[cota] COTA_ESGOTADA em ${chave}. Falha ao trocar para ${chaveModelo(destino)}: ` +
+              `${erro instanceof Error ? erro.message : String(erro)}. Tarefa bloqueada até ${ateISO}. ` +
+              `Registre ESTADO: bloqueado no RELATÓRIO.`,
+          )
+          return
         }
       }
 

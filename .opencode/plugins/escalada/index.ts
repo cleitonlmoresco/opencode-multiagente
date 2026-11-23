@@ -44,9 +44,9 @@ export default {
       if (atual >= NIVEIS.length) return
       const proximo = atual + 1
       const alvo = NIVEIS[proximo - 1]
-      nivel.set(sessionID, proximo)
       try {
         await ctx.session.switchModel({ sessionID, model: alvo })
+        nivel.set(sessionID, proximo)
         await ctx.session.synthetic({
           sessionID,
           text:
