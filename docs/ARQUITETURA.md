@@ -136,13 +136,15 @@ erro de cota → ctx.session.hook("retry")
              → decision = { retry: false }   (sem storm)
              → bloqueia provider/modelo por MULTIAGENTE_COTA_COOLDOWN_MS
              → switchModel para fallback (ou reserva)
+              -> sem fallback: escolherModeloAutomatico (gratuito/outro provider)
              → mensagem sintética COTA_ESGOTADA na sessão
 ```
 
 O bloqueio fica em `ctx.storage` (`cota:bloqueios`), então sobrevive a restart.
 `experimental.model.resolve` desvia um modelo bloqueado dentro do mesmo provider.
-Não há fallback padrão: T3/T4 sem configuração explícita viram
-`ESTADO: bloqueado`, nunca uma revisão rebaixada em silêncio.
+Sem fallback configurado, o plugin procura uma alternativa em `ctx.model.list()`,
+preferindo modelo gratuito e outro provider. Se não houver alternativa, T3/T4
+viram `ESTADO: bloqueado` — nunca uma revisão rebaixada em silêncio.
 
 | Variável | Padrão |
 |---|---|
@@ -150,6 +152,7 @@ Não há fallback padrão: T3/T4 sem configuração explícita viram
 | `MULTIAGENTE_COTA_FALLBACKS` | vazio (`de/para;de/para`) |
 | `MULTIAGENTE_COTA_RESERVA` | vazio |
 | `MULTIAGENTE_COTA_COOLDOWN_MS` | `86400000` |
+| `MULTIAGENTE_COTA_AUTO` | ligado (`0` desliga) |
 
 Teste focado: `node --test .opencode/plugins/cota/logica.test.mjs`.
 

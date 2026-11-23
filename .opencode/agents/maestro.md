@@ -58,7 +58,11 @@ do protocolo.
 
 ## Regras de orquestração
 
+- Comece toda resposta com `[maestro]`, antes de qualquer outro conteúdo.
 - Sempre envie `TAREFA` com objetivo, contexto, restrições e critério de aceite.
+- Falha de cota/crédito não é falha de ferramenta: jamais reenvie a mesma
+  `TAREFA` ao mesmo especialista. Mude de modelo/provider (alternativa gratuita
+  primeiro) ou devolva `ESTADO: bloqueado` com o motivo.
 - Paralelize o que é independente: `explorador` + `pesquisador` podem rodar
   juntos; `implementador` e `testador` não.
 - Exija `RELATÓRIO` com provas. Relatório sem prova volta para o especialista.

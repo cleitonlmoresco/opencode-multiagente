@@ -13,11 +13,13 @@
  * MULTIAGENTE_COTA_FALLBACKS="de/para;de/para" (padrão: vazio)
  * MULTIAGENTE_COTA_RESERVA="provider/modelo" (padrão: vazio)
  * MULTIAGENTE_COTA_COOLDOWN_MS=86400000 (padrão: 24h)
+ * MULTIAGENTE_COTA_AUTO=0 desliga a busca automática (padrão: ligada)
  */
 import {
   bloqueadoAte,
   chaveModelo,
   escolherFallback,
+  escolherModeloAutomatico,
   isQuotaError,
   parseFallbacks,
   parseRef,
@@ -86,7 +88,15 @@ export default {
       event.decision = { retry: false }
 
       const disponivel = (candidato: ModelRef) => !bloqueadoAte(bloqueios, candidato, Date.now())
-      const destino = escolherFallback(modelo, fallbacks, reserva, disponivel)
+      let destino = escolherFallback(modelo, fallbacks, reserva, disponivel)
+      if (!destino && process.env.MULTIAGENTE_COTA_AUTO !== "0") {
+        try {
+          const modelos = await ctx.model.list()
+          destino = escolherModeloAutomatico(modelos, modelo, bloqueios, Date.now())
+        } catch (erro) {
+          console.error("[cota] não foi possível listar modelos alternativos:", erro)
+        }
+      }
       const ateISO = new Date(ate).toISOString()
 
       if (destino) {

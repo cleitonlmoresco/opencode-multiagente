@@ -134,10 +134,12 @@ Detalhes do desenho em [`docs/ARQUITETURA.md`](docs/ARQUITETURA.md#6-escalada).
 ## Fallback por cota
 
 `.opencode/plugins/cota/index.ts` cobre o que a escalada não cobre: limite diário
-do provedor (`429`, `402` ou mensagem de rate limit/quota). Ele **veta o retry**
-(para não formar storm), bloqueia o modelo por um cooldown persistido e troca a
-sessão para um fallback configurado. Sem fallback, a sessão recebe um aviso
-`COTA_ESGOTADA` e o maestro deve registrar `ESTADO: bloqueado`.
+do provedor (`429`, `402`, `usage limit`, `Insufficient balance`). Ele **veta o
+retry** (para não formar storm), bloqueia o modelo por um cooldown persistido e
+troca a sessão para um fallback configurado. Se não houver fallback configurado,
+procura automaticamente outro modelo disponível (`ctx.model.list()`), preferindo
+gratuito e outro provider. Sem alternativa, emite `COTA_ESGOTADA` e o maestro
+registra `ESTADO: bloqueado`.
 
 | Variável | Padrão | Efeito |
 |---|---|---|
@@ -145,10 +147,11 @@ sessão para um fallback configurado. Sem fallback, a sessão recebe um aviso
 | `MULTIAGENTE_COTA_FALLBACKS` | vazio | `de/para;de/para`, ex.: `opencode/gpt-6-luna>opencode/hy4-flash-free` |
 | `MULTIAGENTE_COTA_RESERVA` | vazio | modelo usado quando não há fallback exato |
 | `MULTIAGENTE_COTA_COOLDOWN_MS` | `86400000` | tempo de bloqueio do modelo (24h) |
+| `MULTIAGENTE_COTA_AUTO` | ligado | `0` desliga a busca automática de alternativa |
 
-Não há downgrade automático de T3/T4: configure o fallback explicitamente se
-aceitar revisão em modelo inferior. O bloqueio é gravado em `ctx.storage`, então
-sobrevive a restart do servidor.
+A busca automática pode rebaixar T3/T4 para um modelo gratuito; se isso for
+inaceitável, use `MULTIAGENTE_COTA_AUTO=0` e configure `FALLBACKS`/`RESERVA`
+explicitamente. O bloqueio é gravado em `ctx.storage`, então sobrevive a restart.
 
 Teste focado: `node --test .opencode/plugins/cota/logica.test.mjs`.
 

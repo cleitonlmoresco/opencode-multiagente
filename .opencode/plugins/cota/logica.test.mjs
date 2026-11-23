@@ -5,6 +5,7 @@ import {
   bloqueadoAte,
   chaveModelo,
   escolherFallback,
+  escolherModeloAutomatico,
   isQuotaError,
   parseFallbacks,
   parseRef,
@@ -204,4 +205,57 @@ test("retry com cota e falha no switchModel: aviso específico, sem 'Sem fallbac
   assert.doesNotMatch(avisos[0], /Sem fallback disponível/)
   const storage = chamadas.find((c) => c[0] === "storage")
   assert.ok(storage[2]["opencode/gpt-6-luna"] > Date.now())
+})
+test("isQuotaError cobre mensagens de credito e limite gratuito", () => {
+  assert.equal(isQuotaError({ message: "Free usage limit reached" }), true)
+  assert.equal(isQuotaError({ message: "Insufficient balance" }), true)
+  assert.equal(isQuotaError({ message: "Please top up your account" }), true)
+  assert.equal(isQuotaError({ message: "arquivo não encontrado" }), false)
+})
+
+test("escolherModeloAutomatico prefere gratuito e outro provider, ignora bloqueado", () => {
+  const modelos = [
+    { providerID: "opencode", id: "gpt-6-luna", cost: [{ input: 1, output: 2 }], enabled: true, status: "active", capabilities: { tools: true } },
+    { providerID: "opencode", id: "hy4-flash-free", cost: [{ input: 0, output: 0 }], enabled: true, status: "active", capabilities: { tools: true } },
+    { providerID: "deepseek", id: "deepseek-flash", cost: [{ input: 0, output: 0 }], enabled: true, status: "active", capabilities: { tools: true } },
+    { providerID: "nvidia", id: "bloqueado", cost: [{ input: 0, output: 0 }], enabled: true, status: "active", capabilities: { tools: true } },
+  ]
+  const bloqueios = new Map([["nvidia/bloqueado", Date.now() + 60_000]])
+  const escolhido = escolherModeloAutomatico(
+    modelos,
+    { providerID: "opencode", id: "gpt-6-luna" },
+    bloqueios,
+  )
+  assert.equal(chaveModelo(escolhido), "deepseek/deepseek-flash")
+})
+
+test("retry sem fallback configurado usa alternativa automatica", async (t) => {
+  ambiente(t)
+  const hooks = {}
+  const chamadas = []
+  const ctx = {
+    storage: { get: async () => ({}), set: async () => {} },
+    model: {
+      list: async () => [
+        { providerID: "deepseek", id: "deepseek-flash", cost: [{ input: 0, output: 0 }], enabled: true, status: "active", capabilities: { tools: true } },
+      ],
+    },
+    session: {
+      hook: async (nome, fn) => { hooks[nome] = fn; return { dispose: async () => {} } },
+      switchModel: async (input) => chamadas.push(["switchModel", input]),
+      synthetic: async (input) => chamadas.push(["synthetic", input.text]),
+    },
+  }
+  await plugin.setup(ctx)
+  const evento = {
+    sessionID: "s10",
+    model: { ...modeloPago },
+    error: { message: "Free usage limit reached" },
+    decision: { retry: true, delay: 0 },
+  }
+  await hooks.retry(evento)
+  assert.deepEqual(evento.decision, { retry: false })
+  const troca = chamadas.find((c) => c[0] === "switchModel")
+  assert.deepEqual(troca[1].model, { providerID: "deepseek", id: "deepseek-flash" })
+  assert.match(chamadas.find((c) => c[0] === "synthetic")[1], /Modelo da sessão trocado para deepseek\/deepseek-flash/)
 })

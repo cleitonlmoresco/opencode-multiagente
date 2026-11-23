@@ -6,6 +6,8 @@ conflito, o `AGENTS.md` vence.
 ## 1. Língua comum
 
 - Fale português do Brasil, direto e técnico. Sem preâmbulo, elogio ou repetição.
+- Toda resposta começa com `[<id-do-agente>]`, antes de qualquer outro conteúdo;
+  no maestro, `[maestro]`.
 - Código, caminhos, comandos e identificadores ficam como estão no repositório.
 - Cada afirmação carrega a prova ao lado:
   - código → `caminho/arquivo.py:123`
@@ -66,6 +68,9 @@ Regras:
 - Cota esgotada (`429`, limite diário) não é falha de ferramenta: o plugin `cota`
   barra retries, troca para o fallback configurado e registra `COTA_ESGOTADA`.
   Sem fallback, declare `ESTADO: bloqueado` — nunca rebaixe revisão T3/T4 em silêncio.
+- Erro de crédito/cota (`429`, `402`, `usage limit`, `Insufficient balance`) não
+  entra em retry: o plugin `cota` bloqueia o modelo, procura alternativa
+  disponível (gratuita primeiro, outro provider preferencial) e avisa a sessão.
 - Alternativas OpenRouter (com `OPENROUTER_API_KEY`): `openrouter/google/gemma-4-31b-it:free`
   (T1), `openrouter/google/gemma-4-26b-a4b-it:free` (T2-VL),
   `openrouter/liquid/lfm-3-1.7b:free` (T0/JSON) e `openrouter/openrouter/free`
@@ -100,6 +105,9 @@ lê; o auditor só entra em risco alto ou falha repetida.
   modelo; registre a troca no relatório.
 - `429`/limite diário do modelo → não escalar: aplicar o fallback de cota e
   avisar o usuário; se não houver fallback, devolva `ESTADO: bloqueado`.
+- Se um especialista falhar 2 vezes por cota/crédito, não reenvie a mesma
+  `TAREFA`: marque `ESTADO: bloqueado`, avise o usuário e mude de
+  modelo/provider ou encerre a sessão.
 
 ## 6. Definição de pronto
 
