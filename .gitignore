@@ -10,3 +10,5 @@ node_modules/
 Thumbs.db
 # config local do projeto
 opencode.json
+opencode.jsonc
+opencode.json5

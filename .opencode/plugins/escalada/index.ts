@@ -56,6 +56,17 @@ export default {
         })
       } catch (erro) {
         console.error("[escalada] não foi possível elevar o modelo:", erro)
+        try {
+          await ctx.session.synthetic({
+            sessionID,
+            text:
+              `[escalada] Falha ao elevar para ${alvo.providerID}/${alvo.id}: ` +
+              `${erro instanceof Error ? erro.message : String(erro)}. ` +
+              `Nível da sessão permanece em ${atual}/${NIVEIS.length}.`,
+          })
+        } catch (avisoErro) {
+          console.error("[escalada] não foi possível avisar a sessão:", avisoErro)
+        }
       }
     }
 

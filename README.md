@@ -18,7 +18,7 @@ OpenCode (`opencode auth login`) ou em variáveis de ambiente.
   pesquisa não promove achado a verdade.
 - **Escalada automática**: falha repetida de ferramenta sobe o modelo sozinha,
   sem você perceber no meio da tarefa.
-- **Portátil**: é só uma pasta `.opencode/` mais um `opencode.json`.
+- **Portátil**: é só uma pasta `.opencode/` mais um `opencode.example.json` (copie para `opencode.json` no projeto).
 
 ## Arquitetura
 

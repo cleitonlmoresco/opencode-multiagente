@@ -78,7 +78,7 @@ Regras:
 | `maestro` | decompor, delegar, cobrar protocolo, responder pergunta simples | editar código, revisar o próprio trabalho |
 | `explorador` | ler, buscar, mapear arquivos e chamadas | editar, executar comando que grava |
 | `implementador` | editar código, rodar testes focados | revisar a própria mudança, mexer em dados de produção |
-| `testador` | reproduzir falha, rodar suíte, editar `tests/**` e `.opencode/plugins/cota/logica.test.mjs` | alterar código de produção |
+| `testador` | reproduzir falha, rodar suíte, editar `tests/**` e `.opencode/plugins/**/*.test.mjs` | alterar código de produção |
 | `documentador` | escrever/atualizar documentação | editar código de produção |
 | `pesquisador` | acervo, web, imagens/PDF, navegador | editar arquivos, promover web a garantia |
 | `revisor` | ler diff, rodar testes, apontar achados | editar, aprovar sem prova |

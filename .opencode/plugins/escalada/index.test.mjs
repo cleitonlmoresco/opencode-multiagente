@@ -50,6 +50,8 @@ test("escalada: switchModel falha não incrementa o nível", async (t) => {
   assert.equal(alvos.length, 2)
   assert.deepEqual(alvos[0], { providerID: "opencode", id: "gpt-6-luna" })
   assert.deepEqual(alvos[1], { providerID: "opencode", id: "gpt-6-luna" })
+  const aviso = ctx.chamadas.find((c) => c[0] === "synthetic")
+  assert.match(aviso[1], /Falha ao elevar para opencode\/gpt-6-luna/)
 })
 
 test("escalada: synthetic falha, mas o nível incrementa", async (t) => {
