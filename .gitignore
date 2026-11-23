@@ -1,0 +1,10 @@
+# credenciais e segredos
+.env
+.env.*
+!.env.example
+
+# derivados
+node_modules/
+*.log
+.DS_Store
+Thumbs.db
