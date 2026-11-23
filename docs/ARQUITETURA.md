@@ -16,7 +16,10 @@ opencode.json
 .opencode/commands/*.md               (atalhos de fluxo)
    │
    ▼
-.opencode/plugins/escalada/index.ts   (comportamento em runtime)
+.opencode/plugins/escalada/index.ts   (falha de ferramenta → sobe)
+    │
+    ▼
+.opencode/plugins/cota/index.ts       (cota esgotada → fallback ou bloqueio)
 ```
 
 ## 1. Configuração
@@ -122,7 +125,35 @@ Configuração:
 | `MULTIAGENTE_ESCALADA_MODELO_1` | `opencode/gpt-6-luna` |
 | `MULTIAGENTE_ESCALADA_MODELO_2` | `opencode/claude-fable-5-2` |
 
-## 7. O que este desenho não faz
+## 7. Fallback por cota
+
+`escalada` trata falha de ferramenta. `cota` trata falha de **modelo/provedor**
+por limite diário: status `429`/`402` ou mensagem de rate limit, quota, usage
+limit, budget excedido etc.
+
+```text
+erro de cota → ctx.session.hook("retry")
+             → decision = { retry: false }   (sem storm)
+             → bloqueia provider/modelo por MULTIAGENTE_COTA_COOLDOWN_MS
+             → switchModel para fallback (ou reserva)
+             → mensagem sintética COTA_ESGOTADA na sessão
+```
+
+O bloqueio fica em `ctx.storage` (`cota:bloqueios`), então sobrevive a restart.
+`experimental.model.resolve` desvia um modelo bloqueado dentro do mesmo provider.
+Não há fallback padrão: T3/T4 sem configuração explícita viram
+`ESTADO: bloqueado`, nunca uma revisão rebaixada em silêncio.
+
+| Variável | Padrão |
+|---|---|
+| `MULTIAGENTE_COTA` | ligado (`0` desliga) |
+| `MULTIAGENTE_COTA_FALLBACKS` | vazio (`de/para;de/para`) |
+| `MULTIAGENTE_COTA_RESERVA` | vazio |
+| `MULTIAGENTE_COTA_COOLDOWN_MS` | `86400000` |
+
+Teste focado: `node --test .opencode/plugins/cota/logica.test.mjs`.
+
+## 8. O que este desenho não faz
 
 - Não roteia por intenção automaticamente: quem decide é o maestro, lendo o
   protocolo. Não há classificador determinístico.

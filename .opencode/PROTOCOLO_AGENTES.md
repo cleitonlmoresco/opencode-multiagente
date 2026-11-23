@@ -63,6 +63,9 @@ Regras:
 - O plugin `escalada` eleva a sessão sozinho quando o saldo de falhas de
   ferramenta chega a 3 (um sucesso desconta uma falha); o maestro também escala
   ao receber 2 relatórios `falhou`.
+- Cota esgotada (`429`, limite diário) não é falha de ferramenta: o plugin `cota`
+  barra retries, troca para o fallback configurado e registra `COTA_ESGOTADA`.
+  Sem fallback, declare `ESTADO: bloqueado` — nunca rebaixe revisão T3/T4 em silêncio.
 - Alternativas OpenRouter (com `OPENROUTER_API_KEY`): `openrouter/google/gemma-4-31b-it:free`
   (T1), `openrouter/google/gemma-4-26b-a4b-it:free` (T2-VL),
   `openrouter/liquid/lfm-3-1.7b:free` (T0/JSON) e `openrouter/openrouter/free`
@@ -95,6 +98,8 @@ lê; o auditor só entra em risco alto ou falha repetida.
   continua `SEM_GARANTIA`.
 - Falha de ferramenta repetida na sessão principal → plugin `escalada` troca o
   modelo; registre a troca no relatório.
+- `429`/limite diário do modelo → não escalar: aplicar o fallback de cota e
+  avisar o usuário; se não houver fallback, devolva `ESTADO: bloqueado`.
 
 ## 6. Definição de pronto
 

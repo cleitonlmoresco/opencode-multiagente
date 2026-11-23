@@ -131,6 +131,27 @@ sessão e deixa um aviso sintético.
 
 Detalhes do desenho em [`docs/ARQUITETURA.md`](docs/ARQUITETURA.md#6-escalada).
 
+## Fallback por cota
+
+`.opencode/plugins/cota/index.ts` cobre o que a escalada não cobre: limite diário
+do provedor (`429`, `402` ou mensagem de rate limit/quota). Ele **veta o retry**
+(para não formar storm), bloqueia o modelo por um cooldown persistido e troca a
+sessão para um fallback configurado. Sem fallback, a sessão recebe um aviso
+`COTA_ESGOTADA` e o maestro deve registrar `ESTADO: bloqueado`.
+
+| Variável | Padrão | Efeito |
+|---|---|---|
+| `MULTIAGENTE_COTA` | ligado | `0` desliga o plugin |
+| `MULTIAGENTE_COTA_FALLBACKS` | vazio | `de/para;de/para`, ex.: `opencode/gpt-6-luna>opencode/hy4-flash-free` |
+| `MULTIAGENTE_COTA_RESERVA` | vazio | modelo usado quando não há fallback exato |
+| `MULTIAGENTE_COTA_COOLDOWN_MS` | `86400000` | tempo de bloqueio do modelo (24h) |
+
+Não há downgrade automático de T3/T4: configure o fallback explicitamente se
+aceitar revisão em modelo inferior. O bloqueio é gravado em `ctx.storage`, então
+sobrevive a restart do servidor.
+
+Teste focado: `node --test .opencode/plugins/cota/logica.test.mjs`.
+
 ## Estrutura
 
 ```text
@@ -148,7 +169,8 @@ Detalhes do desenho em [`docs/ARQUITETURA.md`](docs/ARQUITETURA.md#6-escalada).
     ├── README.md                 # referência rápida
     ├── agents/                   # 9 agentes
     ├── commands/                 # 6 comandos
-    └── plugins/escalada/         # escalada por falhas
+    ├── plugins/escalada/         # escalada por falhas de ferramenta
+    └── plugins/cota/             # fallback por cota/limite diário
 ```
 
 ## Segurança e privacidade
@@ -159,7 +181,7 @@ Detalhes do desenho em [`docs/ARQUITETURA.md`](docs/ARQUITETURA.md#6-escalada).
   `python servidor_mcp.py` como referência de MCP local.
 - Modelos `:free` de gateways públicos podem ter limite de requisições e
   política de uso própria; não envie dado sensível para eles.
-- O plugin só troca o modelo da sessão; não envia conteúdo para lugar nenhum.
+- Os plugins só trocam o modelo da sessão; não enviam conteúdo para lugar nenhum.
 
 ## Licença
 
