@@ -1,23 +1,63 @@
 # opencode-multiagente
 
-Roster de agentes para o **OpenCode V2**: um maestro que decompõe o pedido e
-delega para especialistas, cada um com modelo e fronteira próprios. O pacote
-inclui o contrato de handoff, a escada de modelos por custo, comandos prontos e
-um plugin de escalada automática por falhas de ferramenta.
+Roster de agentes para o **OpenCode V2**: um maestro decompõe o pedido e delega
+para especialistas, cada um com modelo e fronteira próprios. O pacote inclui o
+contrato de handoff, a escada de modelos por custo, comandos prontos e um plugin
+de escalada automática por falhas de ferramenta.
 
-Nenhuma chave, token ou caminho pessoal está versionado aqui. A autenticação
-fica no OpenCode (`opencode auth login`) ou em variáveis de ambiente.
+Sem chave, token ou caminho pessoal versionado aqui. A autenticação fica no
+OpenCode (`opencode auth login`) ou em variáveis de ambiente.
+
+## Por que usar
+
+- **Uma língua só**: todos os agentes seguem o mesmo contrato de prova e
+  relatório.
+- **Custo sob controle**: tarefa mecânica em modelo grátis; modelo pago só para
+  revisão, auditoria e risco alto.
+- **Fronteiras claras**: quem edita não revisa; quem revisa não edita; quem
+  pesquisa não promove achado a verdade.
+- **Escalada automática**: falha repetida de ferramenta sobe o modelo sozinha,
+  sem você perceber no meio da tarefa.
+- **Portátil**: é só uma pasta `.opencode/` mais um `opencode.json`.
+
+## Arquitetura
+
+```text
+                 ┌───────────────────────────────┐
+   você ───────▶ │ maestro (primary)             │
+                 │ classifica, delega, consolida │
+                 └──────┬───────────────┬────────┘
+                        │               │
+             ┌──────────▼──┐     ┌──────▼─────────┐
+             │ explorador  │     │ implementador  │
+             │ só leitura  │     │ diff mínimo    │
+             └─────────────┘     └──────┬─────────┘
+                                        │
+                                 ┌──────▼─────────┐
+                                 │ testador       │
+                                 │ reproduz/prova │
+                                 └──────┬─────────┘
+                                        │
+                                 ┌──────▼─────────┐
+                                 │ revisor        │
+                                 │ auditor        │
+                                 └────────────────┘
+```
+
+O fluxo completo está em [`docs/ARQUITETURA.md`](docs/ARQUITETURA.md). O uso no
+dia a dia está em [`docs/COMO_USAR.md`](docs/COMO_USAR.md). Para trocar modelos
+e criar agentes, veja [`docs/PERSONALIZAR.md`](docs/PERSONALIZAR.md).
 
 ## Requisitos
 
 - OpenCode **v2.2.5** ou superior
 - Pelo menos um provider autenticado (`opencode auth list`)
-- Modelos citados abaixo disponíveis na sua conta; ajuste os IDs se necessário
+- Os modelos citados disponíveis na sua conta — ajuste os IDs se necessário
 
-## Instalação em um projeto
+## Instalação
 
 1. Copie a pasta `.opencode/` para a raiz do projeto.
-2. Copie `opencode.example.json` para `opencode.json` na raiz e mescle com a
+2. Copie `opencode.example.json` para `opencode.json` e mescle com a
    configuração que já existir.
 3. Abra uma sessão nova (`/new`). O rodapé deve mostrar `maestro · <modelo>`.
 
@@ -27,24 +67,25 @@ Copy-Item opencode.example.json <destino>\opencode.json
 ```
 
 O `.opencode/` é **project-scoped**: só vale na pasta onde foi instalado. Para
-usar em todos os projetos, copie os arquivos para `~/.config/opencode/`.
+usar em todos os projetos, copie os mesmos arquivos para `~/.config/opencode/` e
+registre `instructions` e `default_agent` no `opencode.jsonc` global.
 
 ## Elenco
 
-| Agente | Modelo | Papel |
+| Agente | Modelo de referência | Papel |
 |---|---|---|
 | `maestro` | Nemotron 3 Ultra 550B | orquestra, delega, cobra o protocolo; não edita |
 | `explorador` | HY4 Flash | busca e leitura somente leitura |
 | `implementador` | DeepSeek V4.1 Flash | edita código com diff mínimo |
 | `testador` | DeepSeek V4.1 Flash | reproduz falha, roda suíte, edita `tests/**` |
-| `documentador` | HY4 Flash | escreve documentação; não edita `.py` |
+| `documentador` | HY4 Flash | escreve documentação; não edita código |
 | `pesquisador` | Nemotron 3.5 Super VL 120B | acervo, web, imagem/PDF |
 | `revisor` | GPT-6 Luna (pago) | revisão de diff, somente leitura |
 | `auditor` | Claude Fable 5.2 (pago) | segunda opinião e risco alto |
 | `guardiao` | Nemotron 3 Ultra 550B | confere citação, página e garantia |
 
-Os modelos são apenas o ponto de partida. Troque os IDs em
-`.opencode/agents/*.md` para o que existir na sua conta.
+Os modelos são o ponto de partida. Troque os IDs em `.opencode/agents/*.md` para
+o que existir na sua conta.
 
 ## Comandos
 
@@ -58,63 +99,67 @@ Os modelos são apenas o ponto de partida. Troque os IDs em
 | `/garantia <texto>` | auditoria de citação, página e selo de garantia |
 
 Também é possível pedir um especialista pelo nome no prompt; o maestro lança o
-subagente correspondente.
+subagente correspondente. Pergunta simples é respondida direto, sem subagente —
+isso é proposital.
 
-## Contrato de handoff
+## Escada de modelos
 
-O `PROTOCOLO_AGENTES.md` é injetado em toda sessão via `instructions`. Ele fixa:
+| Nível | Uso | Exemplo de modelo |
+|---|---|---|
+| T0 | busca, leitura, formatação, documentação | `opencode/hy4-flash-free` |
+| T1 | implementação e testes | `opencode/deepseek-v4.1-flash-free` |
+| T2 | orquestração, arquitetura, pesquisa | `nvidia/nvidia/nemotron-3-ultra-550b-a55b` |
+| T2-VL | imagem, PDF, diagrama | `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b` |
+| T3 | revisão de código (pago) | `opencode/gpt-6-luna` |
+| T4 | auditoria crítica (pago) | `opencode/claude-fable-5-2` |
 
-- língua comum e formato de prova (`caminho:linha`, `livro p.página`, comando + saída);
-- contrato `TAREFA` (quem delega) e `RELATÓRIO` (quem executa);
-- escada de modelos T0–T4 e quando subir;
-- fronteiras de cada papel (quem edita, quem revisa, quem só lê);
-- regras de garantia: saída de LLM/OCR/pesquisa nunca vira `GARANTIDO`.
+Regras: tarefa mecânica começa em T0/T1; revisão é sempre T3/T4; subiu de nível,
+não desce sozinho na mesma sessão.
 
 ## Escalada automática
 
-`.opencode/plugins/escalada/index.ts` mantém um saldo de falhas de ferramenta
-por sessão: erro soma 1, sucesso desconta 1. Ao chegar no limite, troca o modelo
-da sessão e deixa um aviso sintético.
+`.opencode/plugins/escalada/index.ts` mantém um saldo de falhas de ferramenta por
+sessão: erro soma 1, sucesso desconta 1. Ao chegar no limite, troca o modelo da
+sessão e deixa um aviso sintético.
 
 | Variável | Padrão | Efeito |
 |---|---|---|
-| `PEPERTILO_ESCALADA` | ligado | `0` desliga o plugin |
-| `PEPERTILO_ESCALADA_FALHAS` | `3` | saldo de falhas para escalar |
-| `PEPERTILO_ESCALADA_MODELO_1` | `opencode/gpt-6-luna` | primeiro nível |
-| `PEPERTILO_ESCALADA_MODELO_2` | `opencode/claude-fable-5-2` | segundo nível |
+| `MULTIAGENTE_ESCALADA` | ligado | `0` desliga o plugin |
+| `MULTIAGENTE_ESCALADA_FALHAS` | `3` | saldo de falhas para escalar |
+| `MULTIAGENTE_ESCALADA_MODELO_1` | `opencode/gpt-6-luna` | primeiro nível |
+| `MULTIAGENTE_ESCALADA_MODELO_2` | `opencode/claude-fable-5-2` | segundo nível |
 
-A sessão não volta de nível sozinha: use `/new` ou troque o modelo na mão.
-
-## Custo
-
-A escada existe para gastar pouco:
-
-- T0/T1: modelos gratuitos para busca, leitura e implementação;
-- T2: orquestração e pesquisa;
-- T3/T4: só revisão, auditoria, risco alto ou falha repetida.
+Detalhes do desenho em [`docs/ARQUITETURA.md`](docs/ARQUITETURA.md#escalada).
 
 ## Estrutura
 
 ```text
 .
 ├── opencode.example.json
+├── README.md
+├── LICENSE
+├── docs/
+│   ├── ARQUITETURA.md
+│   ├── COMO_USAR.md
+│   └── PERSONALIZAR.md
 └── .opencode
-    ├── PROTOCOLO_AGENTES.md
-    ├── OPENROUTER_MODELOS.md
-    ├── README.md
-    ├── agents/       (9 agentes)
-    ├── commands/     (6 comandos)
-    └── plugins/escalada/index.ts
+    ├── PROTOCOLO_AGENTES.md      # contrato comum (instructions)
+    ├── OPENROUTER_MODELOS.md     # modelos gratuitos e especializados
+    ├── README.md                 # referência rápida
+    ├── agents/                   # 9 agentes
+    ├── commands/                 # 6 comandos
+    └── plugins/escalada/         # escalada por falhas
 ```
 
-## Segurança
+## Segurança e privacidade
 
-- Sem credenciais no repositório: use `opencode auth login` ou variáveis de
+- Nenhuma credencial no repositório: use `opencode auth login` ou variáveis de
   ambiente no servidor do OpenCode.
 - Caminhos absolutos da máquina de origem foram removidos; o exemplo usa
   `python servidor_mcp.py` como referência de MCP local.
 - Modelos `:free` de gateways públicos podem ter limite de requisições e
   política de uso própria; não envie dado sensível para eles.
+- O plugin só troca o modelo da sessão; não envia conteúdo para lugar nenhum.
 
 ## Licença
 

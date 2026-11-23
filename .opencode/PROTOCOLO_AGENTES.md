@@ -1,8 +1,7 @@
 # Protocolo dos agentes — mesma língua, tarefas distintas
 
-Vale para toda sessão deste projeto. Complementa o `AGENTS.md` (regras do
-Pepertilo) e o `PROTOCOLO.md` (intenção do chat). Em conflito, o `AGENTS.md`
-vence.
+Vale para toda sessão deste projeto. Complementa o `AGENTS.md` do projeto; em
+conflito, o `AGENTS.md` vence.
 
 ## 1. Língua comum
 
@@ -10,8 +9,9 @@ vence.
 - Código, caminhos, comandos e identificadores ficam como estão no repositório.
 - Cada afirmação carrega a prova ao lado:
   - código → `caminho/arquivo.py:123`
-  - acervo → `P00160 p.156` (livro + página)
+  - documento → `fonte p.42` (documento + página)
   - teste → comando exato + saída
+  - mudança → diff ou commit
 - Sem prova = `sem garantia`. Não complete lacuna com conhecimento geral.
 - Saída de LLM, visão, OCR ou pesquisa web nunca é `GARANTIDO`; no máximo
   `REVISAR`/`DOCUMENTADO`, com a ressalva escrita.
@@ -36,7 +36,7 @@ Quem executa devolve:
 RELATÓRIO <id>
 ESTADO: ok | bloqueado | falhou
 FIZ: <ações em ordem>
-PROVAS: <comando/teste + saída; caminho:linha; livro p.página>
+PROVAS: <comando/teste + saída; caminho:linha; fonte p.página>
 RISCOS: <o que pode quebrar>
 PRÓXIMO: <quem deve agir>
 ```
@@ -45,7 +45,7 @@ Relatório sem prova é incompleto: colete a prova ou declare `bloqueado`.
 
 ## 3. Escada de modelos
 
-| Nível | Modelo | Uso |
+| Nível | Modelo de referência | Uso |
 |---|---|---|
 | T0 | `opencode/hy4-flash-free` | busca, leitura, formatação, docs |
 | T1 | `opencode/deepseek-v4.1-flash-free` | implementação e testes |
@@ -74,9 +74,9 @@ Regras:
 |---|---|---|
 | `maestro` | decompor, delegar, cobrar protocolo, responder pergunta simples | editar código, revisar o próprio trabalho |
 | `explorador` | ler, buscar, mapear arquivos e chamadas | editar, executar comando que grava |
-| `implementador` | editar código, rodar testes focados | revisar a própria mudança, mexer em banco/JSON de dados |
+| `implementador` | editar código, rodar testes focados | revisar a própria mudança, mexer em dados de produção |
 | `testador` | reproduzir falha, rodar suíte, editar `tests/**` | alterar código de produção |
-| `documentador` | escrever/atualizar documentação | editar `.py` |
+| `documentador` | escrever/atualizar documentação | editar código de produção |
 | `pesquisador` | acervo, web, imagens/PDF, navegador | editar arquivos, promover web a garantia |
 | `revisor` | ler diff, rodar testes, apontar achados | editar, aprovar sem prova |
 | `auditor` | revisão profunda, segunda opinião, risco | editar, inventar cenário |
@@ -91,8 +91,8 @@ lê; o auditor só entra em risco alto ou falha repetida.
 - Review, auditoria, segurança, perda de dados, migração ou concorrência →
   `revisor` (T3) e, se crítico, `auditor` (T4).
 - Pergunta factual simples → `maestro` responde direto, sem subagente.
-- Pesquisa que o acervo não sustenta → `pesquisador`; a resposta final continua
-  `SEM_GARANTIA`.
+- Pesquisa que a base local não sustenta → `pesquisador`; a resposta final
+  continua `SEM_GARANTIA`.
 - Falha de ferramenta repetida na sessão principal → plugin `escalada` troca o
   modelo; registre a troca no relatório.
 
@@ -108,9 +108,9 @@ lê; o auditor só entra em risco alto ou falha repetida.
 
 ## 7. Proibições
 
-- Não rode importador, indexador, `unificar_catalogo.py`, `reindexar.py` ou
-  `backup_db.py --reset` sem ordem explícita: eles sobrescrevem dados reais.
-- Não edite `pepertilo.db`, `indice.db`, `catalogo_unificado.json` ou
-  `pinouts_publicados.json` à mão.
+- Não rode importador, migração, reindexação ou comando destrutivo sem ordem
+  explícita: eles sobrescrevem dados reais.
+- Não edite banco, índice ou JSON de dados à mão.
 - Não afirme que um teste passou sem ter rodado o comando.
-- Não invente pino, página, offset, DTC ou valor para "completar" a resposta.
+- Não invente pino, página, offset, código de erro ou valor para "completar" a
+  resposta.

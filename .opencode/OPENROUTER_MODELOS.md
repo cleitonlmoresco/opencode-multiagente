@@ -1,4 +1,4 @@
-# Modelos OpenRouter no ambiente
+# Modelos OpenRouter
 
 Provider nativo: `openrouter`. O ID completo do OpenRouter vai depois do
 prefixo: `openrouter/google/gemma-4-31b-it:free`.
@@ -28,10 +28,10 @@ confira o limite da conta.
 | `liquid/lfm-3-1.7b:free` | 262K | Compacto 1,7B; raciocina antes de responder; foco em tool calling e JSON estruturado | T0 mecânico, extração de JSON, roteamento |
 | `openrouter/free` | 200K | Roteador automático: escolhe um modelo gratuito compatível com a requisição | Fallback quando o modelo fixo falhar |
 
-Confirmado na API do OpenRouter em 2026-11-23: os quatro aceitam `tools`;
-entrada de imagem/vídeo nos dois Gemma e no roteador (texto/imagem).
+Confirmado na API do OpenRouter: os quatro aceitam `tools`; entrada de
+imagem/vídeo nos dois Gemma e no roteador (texto/imagem).
 
-**Status dos testes com a chave instalada:**
+**Resultado dos testes com chave instalada:**
 
 - `liquid/lfm-3-1.7b:free` — respondeu.
 - `openrouter/openrouter/free` — respondeu.
@@ -51,25 +51,24 @@ Seleção no OpenCode:
 ## Especializados (fora do chat)
 
 Estes endpoints não são modelos de conversa com tool calling; o seletor de
-chat do OpenCode não os opera. Ficam registrados para os pipelines do
-Pepertilo.
+chat do OpenCode não os opera. Ficam registrados para uso em pipelines.
 
 | ID OpenRouter | Categoria | Destaques | Onde usaria |
 |---|---|---|---|
 | `recraft/recraft-v4.1-flash-v2:free` | Geração de imagem | Texto-para-imagem rápido; aceita paleta (`rgb_colors`) e cor de fundo | Diagramas, capas, material visual |
-| `heygen/heygen-voice-turbo:free` | TTS | PCM mono 44,1 kHz; 39 idiomas; até 5.000 caracteres/requisição | Voz do chat / leitura de laudos |
+| `heygen/heygen-voice-turbo:free` | TTS | PCM mono 44,1 kHz; 39 idiomas; até 5.000 caracteres/requisição | Leitura de laudos e respostas |
 | `fish-audio/s2.1-pro:free` | TTS | Síntese para testes e prototipagem de baixo volume | Testes de voz |
-| `respan/span-01-lite:free` | Decisão / avaliação | Pontuação comportamental: probabilidade de um comportamento em trechos de conversa | Avaliar respostas do chatbot |
-| `nvidia/nemotron-3.5-rerank-8b:free` | Reranking (RAG) | Reranker 8B para ordenar relevância | Reordenar páginas do `indice.db` |
-| `nvidia/nemotron-3.5-embed-8b:free` | Embeddings multimodal | Vetores 4096; indexa texto e imagens de documentos | Indexação do acervo (tabelas/gráficos) |
+| `respan/span-01-lite:free` | Decisão / avaliação | Pontuação comportamental: probabilidade de um comportamento em trechos de conversa | Avaliar respostas do assistente |
+| `nvidia/nemotron-3.5-rerank-8b:free` | Reranking (RAG) | Reranker 8B para ordenar relevância | Reordenar resultados de busca |
+| `nvidia/nemotron-3.5-embed-8b:free` | Embeddings multimodal | Vetores 4096; indexa texto e imagens de documentos | Indexação de documentos (tabelas/gráficos) |
 | `nvidia/nemotron-3.5-embed-1b:free` | Embeddings multimodal | Vetores 2048; versão leve para texto e imagens | Indexação incremental |
 | `nvidia/nemotron-3-embed-1b:free` | Embeddings de texto | Busca corporativa, RAG e código com baixa latência | Busca textual rápida |
 
 ## Regras
 
-- Modelo `:free` não muda o selo de garantia do Pepertilo: resposta de LLM
-  continua `REVISAR`/`SEM_GARANTIA`.
+- Modelo `:free` não muda o selo de garantia: resposta de LLM continua
+  `REVISAR`/`SEM_GARANTIA`.
 - Não use o roteador `openrouter/free` para revisão de código: ele escolhe o
   modelo, não garante qualidade. Revisão continua em T3/T4.
-- Se o OpenRouter estiver fora ou sem chave, o ambiente cai para os modelos
-  locais já configurados; nenhum agente depende dele.
+- Se o OpenRouter estiver fora ou sem chave, o ambiente cai para os modelos já
+  configurados; nenhum agente depende dele.

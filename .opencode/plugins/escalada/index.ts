@@ -2,13 +2,13 @@
  * Escalada automática de modelo — OpenCode V2.
  *
  * Mantém um saldo de falhas de ferramenta por sessão: erro soma 1, sucesso
- * desconta 1. Quando o saldo chega ao limite (PEPERTILO_ESCALADA_FALHAS,
- * padrão 3), troca o modelo da sessão para o próximo nível pago, zera o saldo
- * e deixa um aviso sintético. A sessão não volta de nível sozinha — use `/new`
+ * desconta 1. Quando o saldo chega ao limite (MULTIAGENTE_ESCALADA_FALHAS,
+ * padrão 3), troca o modelo da sessão para o próximo nível, zera o saldo e
+ * deixa um aviso sintético. A sessão não volta de nível sozinha — use `/new`
  * ou troque o modelo manualmente.
  *
- * Desligue com PEPERTILO_ESCALADA=0.
- * Modelos: PEPERTILO_ESCALADA_MODELO_1 e PEPERTILO_ESCALADA_MODELO_2
+ * Desligue com MULTIAGENTE_ESCALADA=0.
+ * Modelos: MULTIAGENTE_ESCALADA_MODELO_1 e MULTIAGENTE_ESCALADA_MODELO_2
  * (formato provider/modelo).
  */
 
@@ -22,19 +22,19 @@ function lerModelo(chave: string, padrao: string): ModelRef {
 }
 
 const NIVEIS: ModelRef[] = [
-  lerModelo("PEPERTILO_ESCALADA_MODELO_1", "opencode/gpt-6-luna"),
-  lerModelo("PEPERTILO_ESCALADA_MODELO_2", "opencode/claude-fable-5-2"),
+  lerModelo("MULTIAGENTE_ESCALADA_MODELO_1", "opencode/gpt-6-luna"),
+  lerModelo("MULTIAGENTE_ESCALADA_MODELO_2", "opencode/claude-fable-5-2"),
 ]
 
 function limite(): number {
-  const n = Number(process.env.PEPERTILO_ESCALADA_FALHAS ?? "3")
+  const n = Number(process.env.MULTIAGENTE_ESCALADA_FALHAS ?? "3")
   return Number.isFinite(n) && n >= 1 ? Math.floor(n) : 3
 }
 
 export default {
   id: "escalada",
   async setup(ctx: any) {
-    if (process.env.PEPERTILO_ESCALADA === "0") return
+    if (process.env.MULTIAGENTE_ESCALADA === "0") return
 
     const saldo = new Map<string, number>()
     const nivel = new Map<string, number>()
