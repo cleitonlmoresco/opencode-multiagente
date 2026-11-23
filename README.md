@@ -129,7 +129,7 @@ sessão e deixa um aviso sintético.
 | `MULTIAGENTE_ESCALADA_MODELO_1` | `opencode/gpt-6-luna` | primeiro nível |
 | `MULTIAGENTE_ESCALADA_MODELO_2` | `opencode/claude-fable-5-2` | segundo nível |
 
-Detalhes do desenho em [`docs/ARQUITETURA.md`](docs/ARQUITETURA.md#escalada).
+Detalhes do desenho em [`docs/ARQUITETURA.md`](docs/ARQUITETURA.md#6-escalada).
 
 ## Estrutura
 
