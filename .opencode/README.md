@@ -11,15 +11,15 @@
 
 | Agente | Modelo | Tarefa |
 |---|---|---|
-| `maestro` | Nemotron 3 Ultra 550B | orquestra; não edita |
-| `explorador` | HY4 Flash | leitura somente leitura |
-| `implementador` | DeepSeek V4.1 Flash | edita com diff mínimo |
-| `testador` | DeepSeek V4.1 Flash | reproduz falha, roda suíte |
-| `documentador` | HY4 Flash | escreve docs |
-| `pesquisador` | Nemotron 3.5 Super VL 120B | acervo, web, imagem/PDF |
-| `revisor` | GPT-6 Luna (pago) | revisão somente leitura |
-| `auditor` | Claude Fable 5.2 (pago) | segunda opinião |
-| `guardiao` | Nemotron 3 Ultra 550B | citação, página e garantia |
+| `maestro` | <modelo-raciocinio> | orquestra; não edita |
+| `explorador` | <modelo-barato> | leitura somente leitura |
+| `implementador` | <modelo-barato> | edita com diff mínimo |
+| `testador` | <modelo-barato> | reproduz falha, roda suíte |
+| `documentador` | <modelo-barato> | escreve docs |
+| `pesquisador` | <modelo-visao> | acervo, web, imagem/PDF |
+| `revisor` | <modelo-pago> | revisão somente leitura |
+| `auditor` | <modelo-pago> | segunda opinião |
+| `guardiao` | <modelo-raciocinio> | citação, página e garantia |
 
 ## Comandos
 
@@ -34,8 +34,8 @@ desconta). No limite, troca o modelo da sessão.
 |---|---|
 | `MULTIAGENTE_ESCALADA` | ligado (`0` desliga) |
 | `MULTIAGENTE_ESCALADA_FALHAS` | `3` |
-| `MULTIAGENTE_ESCALADA_MODELO_1` | `opencode/gpt-6-luna` |
-| `MULTIAGENTE_ESCALADA_MODELO_2` | `opencode/claude-fable-5-2` |
+| `MULTIAGENTE_ESCALADA_MODELO_1` | `<modelo-pago>` |
+| `MULTIAGENTE_ESCALADA_MODELO_2` | `<modelo-pago>` |
 
 ## Conferir
 

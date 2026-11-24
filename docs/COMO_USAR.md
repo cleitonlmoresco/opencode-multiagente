@@ -14,7 +14,7 @@ opencode
 Abra uma sessão nova com `/new`. O rodapé deve mostrar o agente e o modelo:
 
 ```text
-maestro · nvidia/nemotron-3-ultra-550b-a55b
+maestro · <modelo-raciocinio>
 ```
 
 O `maestro` só é o padrão se `default_agent` estiver no `opencode.json` **daquele
@@ -87,10 +87,10 @@ Se nada disso aparecer, consulte a seção de problemas abaixo.
 Escolha na lista. Modelos gratuitos conhecidos:
 
 ```text
-opencode/hy4-flash-free
-opencode/deepseek-v4.1-flash-free
-openrouter/liquid/lfm-3-1.7b:free
-openrouter/openrouter/free
+<modelo-barato>
+<modelo-barato>
+<modelo-alternativo>
+<modelo-alternativo>
 ```
 
 Trocar o modelo da sessão **não** troca o modelo dos subagentes: cada agente tem

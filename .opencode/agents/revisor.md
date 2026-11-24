@@ -1,7 +1,6 @@
 ---
 description: Revisão de código somente leitura (modelo pago). Aponta bugs, regressões e testes faltantes com caminho e linha; não corrige.
 mode: all
-model: opencode/gpt-6-luna
 color: "#ff8c42"
 steps: 30
 permissions:

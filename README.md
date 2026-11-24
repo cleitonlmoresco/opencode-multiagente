@@ -123,6 +123,21 @@ Regras: tarefa mecânica começa em T0/T1; revisão é sempre T3/T4; subiu de n�
 não desce sozinho na mesma sessão. Os IDs de modelo ficam em
 `.opencode/agents/*.md` e não são publicados nesta página.
 
+## Roteador automático
+
+Nenhum ID de modelo é versionado. O plugin `.opencode/plugins/roteador/` atribui
+um **papel** a cada agente (`barato`, `raciocinio`, `visao`, `pago`) e resolve o
+modelo real no início da sessão:
+
+1. `~/.config/opencode/multiagente-modelos.json` (opcional, por máquina), ex.:
+   `{ "barato": "provider/modelo", "pago": "provider/modelo" }`.
+2. Se ausente, `ctx.model.list()` escolhe automaticamente: gratuito para
+   `barato`, não gratuito para `pago`, com visão para `visao`, com variantes de
+   esforço para `raciocinio`.
+
+`MULTIAGENTE_ROTEADOR=0` desliga e os agentes herdam o modelo da sessão. O
+maestro nunca cita IDs — ele só escolhe o especialista.
+
 ## Escalada automática
 
 `.opencode/plugins/escalada/index.ts` mantém um saldo de falhas de ferramenta por

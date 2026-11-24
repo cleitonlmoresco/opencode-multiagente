@@ -1,7 +1,6 @@
 ---
 description: Explora o repositório em modo somente leitura. Mapeia arquivos, símbolos, chamadas e fluxos; devolve caminhos absolutos e trechos relevantes.
 mode: subagent
-model: opencode/hy4-flash-free
 color: "#4cc9f0"
 permissions:
   - action: edit

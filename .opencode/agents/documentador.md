@@ -1,7 +1,6 @@
 ---
 description: Escreve e atualiza documentação a partir do código e das decisões reais. Não altera código de produção.
 mode: subagent
-model: opencode/hy4-flash-free
 color: "#b8b8ff"
 steps: 30
 permissions:

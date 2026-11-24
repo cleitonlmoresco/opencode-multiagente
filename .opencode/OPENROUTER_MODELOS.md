@@ -1,7 +1,7 @@
 # Modelos OpenRouter
 
 Provider nativo: `openrouter`. O ID completo do OpenRouter vai depois do
-prefixo: `openrouter/google/gemma-4-31b-it:free`.
+prefixo: `<modelo-alternativo>`.
 
 ## Como habilitar
 
@@ -26,7 +26,7 @@ confira o limite da conta.
 | `google/gemma-4-31b-it:free` | 262K | Denso 30,7B; texto, imagem e vídeo; raciocínio configurável; tool calling nativo | T1 alternativo para código e revisão leve |
 | `google/gemma-4-26b-a4b-it:free` | 262K | MoE 25,2B totais / 3,8B ativos; texto, imagem e vídeo (até 60s a 1 fps) | T2-VL alternativo para imagem/PDF/vídeo |
 | `liquid/lfm-3-1.7b:free` | 262K | Compacto 1,7B; raciocina antes de responder; foco em tool calling e JSON estruturado | T0 mecânico, extração de JSON, roteamento |
-| `openrouter/free` | 200K | Roteador automático: escolhe um modelo gratuito compatível com a requisição | Fallback quando o modelo fixo falhar |
+| `<modelo-alternativo>` | 200K | Roteador automático: escolhe um modelo gratuito compatível com a requisição | Fallback quando o modelo fixo falhar |
 
 Confirmado na API do OpenRouter: os quatro aceitam `tools`; entrada de
 imagem/vídeo nos dois Gemma e no roteador (texto/imagem).
@@ -34,18 +34,18 @@ imagem/vídeo nos dois Gemma e no roteador (texto/imagem).
 **Resultado dos testes com chave instalada:**
 
 - `liquid/lfm-3-1.7b:free` — respondeu.
-- `openrouter/openrouter/free` — respondeu.
+- `<modelo-alternativo>` — respondeu.
 - `google/gemma-4-31b-it:free` e `google/gemma-4-26b-a4b-it:free` —
   `AI.Error.RateLimit: Provider returned error`. A credencial está ok; o limite
   é do endpoint gratuito do provedor upstream. Tente mais tarde ou use o
-  `openrouter/free`.
+  `<modelo-alternativo>`.
 
 Seleção no OpenCode:
 
 ```text
-/model openrouter/google/gemma-4-31b-it:free
-/model openrouter/liquid/lfm-3-1.7b:free
-/model openrouter/openrouter/free
+/model <modelo-alternativo>
+/model <modelo-alternativo>
+/model <modelo-alternativo>
 ```
 
 ## Especializados (fora do chat)
@@ -59,16 +59,16 @@ chat do OpenCode não os opera. Ficam registrados para uso em pipelines.
 | `heygen/heygen-voice-turbo:free` | TTS | PCM mono 44,1 kHz; 39 idiomas; até 5.000 caracteres/requisição | Leitura de laudos e respostas |
 | `fish-audio/s2.1-pro:free` | TTS | Síntese para testes e prototipagem de baixo volume | Testes de voz |
 | `respan/span-01-lite:free` | Decisão / avaliação | Pontuação comportamental: probabilidade de um comportamento em trechos de conversa | Avaliar respostas do assistente |
-| `nvidia/nemotron-3.5-rerank-8b:free` | Reranking (RAG) | Reranker 8B para ordenar relevância | Reordenar resultados de busca |
-| `nvidia/nemotron-3.5-embed-8b:free` | Embeddings multimodal | Vetores 4096; indexa texto e imagens de documentos | Indexação de documentos (tabelas/gráficos) |
-| `nvidia/nemotron-3.5-embed-1b:free` | Embeddings multimodal | Vetores 2048; versão leve para texto e imagens | Indexação incremental |
-| `nvidia/nemotron-3-embed-1b:free` | Embeddings de texto | Busca corporativa, RAG e código com baixa latência | Busca textual rápida |
+| `<modelo-especializado>` | Reranking (RAG) | Reranker 8B para ordenar relevância | Reordenar resultados de busca |
+| `<modelo-especializado>` | Embeddings multimodal | Vetores 4096; indexa texto e imagens de documentos | Indexação de documentos (tabelas/gráficos) |
+| `<modelo-especializado>` | Embeddings multimodal | Vetores 2048; versão leve para texto e imagens | Indexação incremental |
+| `<modelo-especializado>` | Embeddings de texto | Busca corporativa, RAG e código com baixa latência | Busca textual rápida |
 
 ## Regras
 
 - Modelo `:free` não muda o selo de garantia: resposta de LLM continua
   `REVISAR`/`SEM_GARANTIA`.
-- Não use o roteador `openrouter/free` para revisão de código: ele escolhe o
+- Não use o roteador `<modelo-alternativo>` para revisão de código: ele escolhe o
   modelo, não garante qualidade. Revisão continua em T3/T4.
 - Se o OpenRouter estiver fora ou sem chave, o ambiente cai para os modelos já
   configurados; nenhum agente depende dele.

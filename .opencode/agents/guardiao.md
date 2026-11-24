@@ -1,7 +1,6 @@
 ---
 description: Auditor de proveniência. Confere citação, página, selo de garantia e afirmações sem fonte; não reescreve sem pedido.
 mode: all
-model: nvidia/nvidia/nemotron-3-ultra-550b-a55b
 color: "#90be6d"
 steps: 30
 permissions:

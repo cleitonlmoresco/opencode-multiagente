@@ -1,7 +1,6 @@
 ---
 description: Implementa mudanças de código com diff mínimo, seguindo os padrões do repositório. Roda testes focados e entrega diff + provas.
 mode: all
-model: opencode/deepseek-v4.1-flash-free
 color: "#3ddc97"
 steps: 50
 permissions:

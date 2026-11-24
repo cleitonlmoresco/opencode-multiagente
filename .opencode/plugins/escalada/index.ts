@@ -14,17 +14,19 @@
 
 type ModelRef = { providerID: string; id: string }
 
-function lerModelo(chave: string, padrao: string): ModelRef {
+function lerModelo(chave: string, padrao: string): ModelRef | null {
   const bruto = (process.env[chave] ?? padrao).trim()
   const corte = bruto.indexOf("/")
-  if (corte <= 0) return { providerID: "opencode", id: "gpt-6-luna" }
+  if (corte <= 0) return null
   return { providerID: bruto.slice(0, corte), id: bruto.slice(corte + 1) }
 }
 
-const NIVEIS: ModelRef[] = [
-  lerModelo("MULTIAGENTE_ESCALADA_MODELO_1", "opencode/gpt-6-luna"),
-  lerModelo("MULTIAGENTE_ESCALADA_MODELO_2", "opencode/claude-fable-5-2"),
-]
+function obterNiveis(): ModelRef[] {
+  return [
+    lerModelo("MULTIAGENTE_ESCALADA_MODELO_1", ""),
+    lerModelo("MULTIAGENTE_ESCALADA_MODELO_2", ""),
+  ].filter((m): m is ModelRef => m !== null)
+}
 
 function limite(): number {
   const n = Number(process.env.MULTIAGENTE_ESCALADA_FALHAS ?? "3")
@@ -40,10 +42,11 @@ export default {
     const nivel = new Map<string, number>()
 
     const elevar = async (sessionID: string, total: number) => {
+      const niveis = obterNiveis()
       const atual = nivel.get(sessionID) ?? 0
-      if (atual >= NIVEIS.length) return
+      if (atual >= niveis.length) return
       const proximo = atual + 1
-      const alvo = NIVEIS[proximo - 1]
+      const alvo = niveis[proximo - 1]
       try {
         await ctx.session.switchModel({ sessionID, model: alvo })
         nivel.set(sessionID, proximo)
@@ -52,7 +55,7 @@ export default {
           text:
             `[escalada] saldo de ${total} falhas de ferramenta. ` +
             `Modelo elevado para ${alvo.providerID}/${alvo.id} ` +
-            `(nível ${proximo}/${NIVEIS.length}).`,
+            `(nível ${proximo}/${niveis.length}).`,
         })
       } catch (erro) {
         console.error("[escalada] não foi possível elevar o modelo:", erro)
@@ -62,7 +65,7 @@ export default {
             text:
               `[escalada] Falha ao elevar para ${alvo.providerID}/${alvo.id}: ` +
               `${erro instanceof Error ? erro.message : String(erro)}. ` +
-              `Nível da sessão permanece em ${atual}/${NIVEIS.length}.`,
+              `Nível da sessão permanece em ${atual}/${niveis.length}.`,
           })
         } catch (avisoErro) {
           console.error("[escalada] não foi possível avisar a sessão:", avisoErro)

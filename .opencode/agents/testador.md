@@ -1,7 +1,6 @@
 ---
 description: Reproduz falhas, roda a suíte focada e diagnostica a causa. Pode ajustar apenas `tests/**` e `.opencode/plugins/**/*.test.mjs`; não altera código de produção.
 mode: subagent
-model: opencode/deepseek-v4.1-flash-free
 color: "#ffd166"
 steps: 40
 permissions:

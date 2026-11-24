@@ -1,7 +1,6 @@
 ---
 description: Pesquisa no acervo, na web e em imagens/PDF. Cita fonte e página; nunca promove pesquisa a garantia.
 mode: all
-model: nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b
 color: "#f72585"
 steps: 40
 permissions:

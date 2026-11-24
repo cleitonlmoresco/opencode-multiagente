@@ -52,7 +52,7 @@ function ambiente(t, env = {}) {
 }
 
 const erroCota = { status: 429, type: "provider.rate-limit", message: "rate limit exceeded" }
-const modeloPago = { providerID: "opencode", id: "gpt-6-luna" }
+const modeloPago = { providerID: "teste", id: "pago" }
 
 test("isQuotaError reconhece 429/402 e mensagens de cota, não erro comum", () => {
   assert.equal(isQuotaError(erroCota), true)
@@ -65,33 +65,33 @@ test("isQuotaError reconhece 429/402 e mensagens de cota, não erro comum", () =
 
 test("parseFallbacks e escolherFallback respeitam origem, reserva e igualdade", () => {
   const mapa = parseFallbacks(
-    "opencode/gpt-6-luna>opencode/hy4-flash-free;invalido;sem-barra>x/y>z",
+    "teste/pago>teste/gratuito;invalido;sem-barra>x/y>z",
   )
   assert.equal(mapa.size, 1)
-  assert.equal(chaveModelo(escolherFallback(modeloPago, mapa, null)), "opencode/hy4-flash-free")
+  assert.equal(chaveModelo(escolherFallback(modeloPago, mapa, null)), "teste/gratuito")
   assert.equal(
-    chaveModelo(escolherFallback({ providerID: "x", id: "y" }, mapa, parseRef("ollama/qwen2.5:7b"))),
-    "ollama/qwen2.5:7b",
+    chaveModelo(escolherFallback({ providerID: "x", id: "y" }, mapa, parseRef("teste/reserva"))),
+    "teste/reserva",
   )
-  const mesmo = parseFallbacks("opencode/gpt-6-luna>opencode/gpt-6-luna")
+  const mesmo = parseFallbacks("teste/pago>teste/pago")
   assert.equal(escolherFallback(modeloPago, mesmo, null), null)
 })
 
 test("escolherFallback ignora um destino já bloqueado e usa a reserva", () => {
-  const mapa = parseFallbacks("opencode/gpt-6-luna>opencode/hy4-flash-free")
-  const indisponivel = (modelo) => chaveModelo(modelo) !== "opencode/hy4-flash-free"
+  const mapa = parseFallbacks("teste/pago>teste/gratuito")
+  const indisponivel = (modelo) => chaveModelo(modelo) !== "teste/gratuito"
   const destino = escolherFallback(
     modeloPago,
     mapa,
-    parseRef("ollama/qwen2.5:7b"),
+    parseRef("teste/reserva"),
     indisponivel,
   )
-  assert.equal(chaveModelo(destino), "ollama/qwen2.5:7b")
+  assert.equal(chaveModelo(destino), "teste/reserva")
 })
 
 test("retry com cota e fallback: veta retry, troca modelo, avisa e persiste bloqueio", async (t) => {
   ambiente(t, {
-    MULTIAGENTE_COTA_FALLBACKS: "opencode/gpt-6-luna>opencode/hy4-flash-free",
+    MULTIAGENTE_COTA_FALLBACKS: "teste/pago>teste/gratuito",
     MULTIAGENTE_COTA_COOLDOWN_MS: "1000",
   })
   const ctx = ctxFake()
@@ -109,14 +109,14 @@ test("retry com cota e fallback: veta retry, troca modelo, avisa e persiste bloq
   assert.deepEqual(evento.decision, { retry: false })
   assert.deepEqual(
     ctx.chamadas.find((c) => c[0] === "switchModel"),
-    ["switchModel", { sessionID: "s1", model: { providerID: "opencode", id: "hy4-flash-free" } }],
+    ["switchModel", { sessionID: "s1", model: { providerID: "teste", id: "gratuito" } }],
   )
   const aviso = ctx.chamadas.find((c) => c[0] === "synthetic")
   assert.match(aviso[1], /COTA_ESGOTADA/)
   assert.match(aviso[1], /ESTADO: bloqueado/)
   const storage = ctx.chamadas.find((c) => c[0] === "storage")
   assert.equal(storage[1], "cota:bloqueios")
-  assert.ok(storage[2]["opencode/gpt-6-luna"] > Date.now())
+  assert.ok(storage[2]["teste/pago"] > Date.now())
 })
 
 test("retry com cota sem fallback: não troca modelo, mas bloqueia e avisa", async (t) => {
@@ -156,26 +156,26 @@ test("retry sem cota não mexe na decisão do OpenCode", async (t) => {
 
 test("model.resolve desvia modelo bloqueado apenas dentro do mesmo provider", async (t) => {
   ambiente(t, {
-    MULTIAGENTE_COTA_FALLBACKS: "opencode/gpt-6-luna>opencode/hy4-flash-free",
+    MULTIAGENTE_COTA_FALLBACKS: "teste/pago>teste/gratuito",
   })
   const futuro = Date.now() + 60_000
-  const ctx = ctxFake({ "opencode/gpt-6-luna": futuro })
+  const ctx = ctxFake({ "teste/pago": futuro })
   await plugin.setup(ctx)
 
   const mesmoProvider = { sessionID: "s4", model: { ...modeloPago } }
   ctx.hooks["experimental.model.resolve"](mesmoProvider)
-  assert.equal(chaveModelo(mesmoProvider.model), "opencode/hy4-flash-free")
+  assert.equal(chaveModelo(mesmoProvider.model), "teste/gratuito")
 
-  const outroProvider = { sessionID: "s5", model: { providerID: "nvidia", id: "nemotron" } }
+  const outroProvider = { sessionID: "s5", model: { providerID: "teste", id: "outro" } }
   ctx.hooks["experimental.model.resolve"](outroProvider)
-  assert.equal(chaveModelo(outroProvider.model), "nvidia/nemotron")
+  assert.equal(chaveModelo(outroProvider.model), "teste/outro")
 
-  assert.ok(bloqueadoAte(new Map([["opencode/gpt-6-luna", futuro]]), modeloPago, Date.now()) > 0)
-  assert.equal(bloqueadoAte(new Map([["opencode/gpt-6-luna", 1]]), modeloPago, Date.now()), 0)
+  assert.ok(bloqueadoAte(new Map([["teste/pago", futuro]]), modeloPago, Date.now()) > 0)
+  assert.equal(bloqueadoAte(new Map([["teste/pago", 1]]), modeloPago, Date.now()), 0)
 })
 
 test("retry com cota e falha no switchModel: aviso específico, sem 'Sem fallback'", async (t) => {
-  ambiente(t, { MULTIAGENTE_COTA_FALLBACKS: "opencode/gpt-6-luna>opencode/hy4-flash-free" })
+  ambiente(t, { MULTIAGENTE_COTA_FALLBACKS: "teste/pago>teste/gratuito" })
   const hooks = {}
   const chamadas = []
   const ctx = {
@@ -200,11 +200,11 @@ test("retry com cota e falha no switchModel: aviso específico, sem 'Sem fallbac
   assert.deepEqual(evento.decision, { retry: false })
   const avisos = chamadas.filter((c) => c[0] === "synthetic").map((c) => c[1])
   assert.equal(avisos.length, 1)
-  assert.match(avisos[0], /Falha ao trocar para opencode\/hy4-flash-free/)
+  assert.match(avisos[0], /Falha ao trocar para teste\/gratuito/)
   assert.match(avisos[0], /switch falhou/)
   assert.doesNotMatch(avisos[0], /Sem fallback disponível/)
   const storage = chamadas.find((c) => c[0] === "storage")
-  assert.ok(storage[2]["opencode/gpt-6-luna"] > Date.now())
+  assert.ok(storage[2]["teste/pago"] > Date.now())
 })
 test("isQuotaError cobre mensagens de credito e limite gratuito", () => {
   assert.equal(isQuotaError({ message: "Free usage limit reached" }), true)
@@ -215,18 +215,18 @@ test("isQuotaError cobre mensagens de credito e limite gratuito", () => {
 
 test("escolherModeloAutomatico prefere gratuito e outro provider, ignora bloqueado", () => {
   const modelos = [
-    { providerID: "opencode", id: "gpt-6-luna", cost: [{ input: 1, output: 2 }], enabled: true, status: "active", capabilities: { tools: true } },
-    { providerID: "opencode", id: "hy4-flash-free", cost: [{ input: 0, output: 0 }], enabled: true, status: "active", capabilities: { tools: true } },
-    { providerID: "deepseek", id: "deepseek-flash", cost: [{ input: 0, output: 0 }], enabled: true, status: "active", capabilities: { tools: true } },
-    { providerID: "nvidia", id: "bloqueado", cost: [{ input: 0, output: 0 }], enabled: true, status: "active", capabilities: { tools: true } },
+    { providerID: "teste", id: "pago", cost: [{ input: 1, output: 2 }], enabled: true, status: "active", capabilities: { tools: true } },
+    { providerID: "teste", id: "gratuito", cost: [{ input: 0, output: 0 }], enabled: true, status: "active", capabilities: { tools: true } },
+    { providerID: "outro", id: "alternativo", cost: [{ input: 0, output: 0 }], enabled: true, status: "active", capabilities: { tools: true } },
+    { providerID: "bloqueio", id: "bloqueado", cost: [{ input: 0, output: 0 }], enabled: true, status: "active", capabilities: { tools: true } },
   ]
-  const bloqueios = new Map([["nvidia/bloqueado", Date.now() + 60_000]])
+  const bloqueios = new Map([["bloqueio/bloqueado", Date.now() + 60_000]])
   const escolhido = escolherModeloAutomatico(
     modelos,
-    { providerID: "opencode", id: "gpt-6-luna" },
+    { providerID: "teste", id: "pago" },
     bloqueios,
   )
-  assert.equal(chaveModelo(escolhido), "deepseek/deepseek-flash")
+  assert.equal(chaveModelo(escolhido), "outro/alternativo")
 })
 
 test("retry sem fallback configurado usa alternativa automatica", async (t) => {
@@ -237,7 +237,7 @@ test("retry sem fallback configurado usa alternativa automatica", async (t) => {
     storage: { get: async () => ({}), set: async () => {} },
     model: {
       list: async () => [
-        { providerID: "deepseek", id: "deepseek-flash", cost: [{ input: 0, output: 0 }], enabled: true, status: "active", capabilities: { tools: true } },
+        { providerID: "outro", id: "alternativo", cost: [{ input: 0, output: 0 }], enabled: true, status: "active", capabilities: { tools: true } },
       ],
     },
     session: {
@@ -256,6 +256,6 @@ test("retry sem fallback configurado usa alternativa automatica", async (t) => {
   await hooks.retry(evento)
   assert.deepEqual(evento.decision, { retry: false })
   const troca = chamadas.find((c) => c[0] === "switchModel")
-  assert.deepEqual(troca[1].model, { providerID: "deepseek", id: "deepseek-flash" })
-  assert.match(chamadas.find((c) => c[0] === "synthetic")[1], /Modelo da sessão trocado para deepseek\/deepseek-flash/)
+  assert.deepEqual(troca[1].model, { providerID: "outro", id: "alternativo" })
+  assert.match(chamadas.find((c) => c[0] === "synthetic")[1], /Modelo da sessão trocado para outro\/alternativo/)
 })

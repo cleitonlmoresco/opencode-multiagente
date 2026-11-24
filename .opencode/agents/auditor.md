@@ -1,7 +1,6 @@
 ---
 description: Auditoria crítica e segunda opinião (modelo pago forte). Entra em risco alto ou depois de falhas repetidas; não edita.
 mode: all
-model: opencode/claude-fable-5-2
 color: "#ef233c"
 steps: 40
 permissions:

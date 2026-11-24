@@ -49,15 +49,19 @@ Relatório sem prova é incompleto: colete a prova ou declare `bloqueado`.
 
 | Nível | Modelo de referência | Uso |
 |---|---|---|
-| T0 | `opencode/hy4-flash-free` | busca, leitura, formatação, docs |
-| T1 | `opencode/deepseek-v4.1-flash-free` | implementação e testes |
-| T2 | `nvidia/nvidia/nemotron-3-ultra-550b-a55b` | orquestração, arquitetura, pesquisa |
-| T2-VL | `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b` | imagem, PDF, diagrama |
-| T3 | `opencode/gpt-6-luna` | revisão de código (pago) |
-| T4 | `opencode/claude-fable-5-2` | auditoria crítica ou escalada (pago) |
+| T0 | `<modelo-barato>` | busca, leitura, formatação, docs |
+| T1 | `<modelo-barato>` | implementação e testes |
+| T2 | `<modelo-raciocinio>` | orquestração, arquitetura, pesquisa |
+| T2-VL | `<modelo-visao>` | imagem, PDF, diagrama |
+| T3 | `<modelo-pago>` | revisão de código (pago) |
+| T4 | `<modelo-pago>` | auditoria crítica ou escalada (pago) |
 
 Regras:
 
+- Nenhum ID de modelo é fixado neste repo. O plugin `roteador` resolve o modelo de
+  cada agente no início da sessão: arquivo local por máquina em
+  `~/.config/opencode/multiagente-modelos.json` ou descoberta automática em
+  `ctx.model.list()`. O maestro escolhe apenas o especialista.
 - Tarefa mecânica começa em T0/T1. Não gaste T2 para renomear variável.
 - Revisão ou auditoria de código é sempre T3/T4, mesmo que o diff pareça simples.
 - Subiu de nível, não volta no meio da sessão. Para reiniciar a escada, use
@@ -71,9 +75,9 @@ Regras:
 - Erro de crédito/cota (`429`, `402`, `usage limit`, `Insufficient balance`) não
   entra em retry: o plugin `cota` bloqueia o modelo, procura alternativa
   disponível (gratuita primeiro, outro provider preferencial) e avisa a sessão.
-- Alternativas OpenRouter (com `OPENROUTER_API_KEY`): `openrouter/google/gemma-4-31b-it:free`
-  (T1), `openrouter/google/gemma-4-26b-a4b-it:free` (T2-VL),
-  `openrouter/liquid/lfm-3-1.7b:free` (T0/JSON) e `openrouter/openrouter/free`
+- Alternativas OpenRouter (com `OPENROUTER_API_KEY`): `<modelo-alternativo>`
+  (T1), `<modelo-alternativo>` (T2-VL),
+  `<modelo-alternativo>` (T0/JSON) e `<modelo-alternativo>`
   (fallback). Detalhes em `.opencode/OPENROUTER_MODELOS.md`.
 
 ## 4. Papéis e fronteiras

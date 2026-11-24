@@ -8,7 +8,7 @@ Edite o `model` no frontmatter:
 ---
 description: ...
 mode: subagent
-model: opencode/deepseek-v4.1-flash-free
+model: <modelo-barato>
 ---
 ```
 
@@ -30,7 +30,7 @@ O agente deve aparecer com `model.providerID` e `model.id` novos.
 ---
 description: Responde dúvidas de SQL e revisa migrations.
 mode: subagent
-model: opencode/deepseek-v4.1-flash-free
+model: <modelo-barato>
 steps: 20
 permissions:
   - action: edit
@@ -104,14 +104,14 @@ opencode auth login openrouter
 estes modelos entram no seletor:
 
 ```text
-openrouter/liquid/lfm-3-1.7b:free
-openrouter/openrouter/free
-openrouter/google/gemma-4-31b-it:free
-openrouter/google/gemma-4-26b-a4b-it:free
+<modelo-alternativo>
+<modelo-alternativo>
+<modelo-alternativo>
+<modelo-alternativo>
 ```
 
 Os dois Gemma podem devolver `Provider returned error` por limite do endpoint
-gratuito. O `openrouter/free` escolhe um modelo disponível automaticamente, mas
+gratuito. O `<modelo-alternativo>` escolhe um modelo disponível automaticamente, mas
 não serve para revisão de código: ele decide o modelo, não a qualidade.
 
 Detalhes em [`.opencode/OPENROUTER_MODELOS.md`](../.opencode/OPENROUTER_MODELOS.md).

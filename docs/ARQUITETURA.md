@@ -59,7 +59,7 @@ comportamento; o corpo é o prompt de sistema.
 ---
 description: Revisão de código somente leitura (modelo pago).
 mode: all          # primary | subagent | all
-model: opencode/gpt-6-luna
+model: <modelo-pago>
 steps: 30          # teto de passos
 permissions:
   - action: edit
@@ -122,8 +122,8 @@ Configuração:
 |---|---|
 | `MULTIAGENTE_ESCALADA` | ligado |
 | `MULTIAGENTE_ESCALADA_FALHAS` | `3` |
-| `MULTIAGENTE_ESCALADA_MODELO_1` | `opencode/gpt-6-luna` |
-| `MULTIAGENTE_ESCALADA_MODELO_2` | `opencode/claude-fable-5-2` |
+| `MULTIAGENTE_ESCALADA_MODELO_1` | `<modelo-pago>` |
+| `MULTIAGENTE_ESCALADA_MODELO_2` | `<modelo-pago>` |
 
 ## 7. Fallback por cota
 
