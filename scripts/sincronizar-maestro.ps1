@@ -6,7 +6,7 @@ $fonte = Join-Path $raiz ".opencode"
 $cfgDir = Join-Path $env:USERPROFILE ".config\opencode"
 
 # A fonte universal é o PROTOCOLO_AGENTES.md do repo.
-$protocolo = Join-Path $fonte "PROTOCOLO_AGENTES.md"
+$protocolo = Join-Path $fonte "INSTRUCOES_UNIVERSAIS.md"
 $global = Join-Path $cfgDir "INSTRUCOES_GLOBAIS.md"
 Copy-Item -Path $protocolo -Destination $global -Force
 Write-Output "GLOBAL: $global <- $protocolo"
