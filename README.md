@@ -92,22 +92,6 @@ O `.opencode/` é **project-scoped**: só vale na pasta onde foi instalado. Para
 usar em todos os projetos, copie os mesmos arquivos para `~/.config/opencode/` e
 registre `instructions` e `default_agent` no `opencode.jsonc` global.
 
-## Elenco
-
-| Agente | Modelo de referência | Papel |
-|---|---|---|
-| `maestro` | Nemotron 3 Ultra 550B | orquestra, delega, cobra o protocolo; não edita |
-| `explorador` | HY4 Flash | busca e leitura somente leitura |
-| `implementador` | DeepSeek V4.1 Flash | edita código com diff mínimo |
-| `testador` | DeepSeek V4.1 Flash | reproduz falha, roda suíte, edita `tests/**` |
-| `documentador` | HY4 Flash | escreve documentação; não edita código |
-| `pesquisador` | Nemotron 3.5 Super VL 120B | acervo, web, imagem/PDF |
-| `revisor` | GPT-6 Luna (pago) | revisão de diff, somente leitura |
-| `auditor` | Claude Fable 5.2 (pago) | segunda opinião e risco alto |
-| `guardiao` | Nemotron 3 Ultra 550B | confere citação, página e garantia |
-
-Os modelos são o ponto de partida. Troque os IDs em `.opencode/agents/*.md` para
-o que existir na sua conta.
 
 ## Comandos
 
@@ -126,17 +110,18 @@ isso é proposital.
 
 ## Escada de modelos
 
-| Nível | Uso | Exemplo de modelo |
+| Nível | Uso | Custo |
 |---|---|---|
-| T0 | busca, leitura, formatação, documentação | `opencode/hy4-flash-free` |
-| T1 | implementação e testes | `opencode/deepseek-v4.1-flash-free` |
-| T2 | orquestração, arquitetura, pesquisa | `nvidia/nvidia/nemotron-3-ultra-550b-a55b` |
-| T2-VL | imagem, PDF, diagrama | `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b` |
-| T3 | revisão de código (pago) | `opencode/gpt-6-luna` |
-| T4 | auditoria crítica (pago) | `opencode/claude-fable-5-2` |
+| T0 | busca, leitura, formatação, documentação | gratuito |
+| T1 | implementação e testes | gratuito |
+| T2 | orquestração, arquitetura, pesquisa | configurável |
+| T2-VL | imagem, PDF, diagrama | configurável |
+| T3 | revisão de código | pago |
+| T4 | auditoria crítica | pago |
 
 Regras: tarefa mecânica começa em T0/T1; revisão é sempre T3/T4; subiu de nível,
-não desce sozinho na mesma sessão.
+não desce sozinho na mesma sessão. Os IDs de modelo ficam em
+`.opencode/agents/*.md` e não são publicados nesta página.
 
 ## Escalada automática
 
@@ -148,8 +133,8 @@ sessão e deixa um aviso sintético.
 |---|---|---|
 | `MULTIAGENTE_ESCALADA` | ligado | `0` desliga o plugin |
 | `MULTIAGENTE_ESCALADA_FALHAS` | `3` | saldo de falhas para escalar |
-| `MULTIAGENTE_ESCALADA_MODELO_1` | `opencode/gpt-6-luna` | primeiro nível |
-| `MULTIAGENTE_ESCALADA_MODELO_2` | `opencode/claude-fable-5-2` | segundo nível |
+| `MULTIAGENTE_ESCALADA_MODELO_1` | `<provider/modelo>` | primeiro nível |
+| `MULTIAGENTE_ESCALADA_MODELO_2` | `<provider/modelo>` | segundo nível |
 
 Detalhes do desenho em [`docs/ARQUITETURA.md`](docs/ARQUITETURA.md#6-escalada).
 
@@ -166,7 +151,7 @@ registra `ESTADO: bloqueado`.
 | Variável | Padrão | Efeito |
 |---|---|---|
 | `MULTIAGENTE_COTA` | ligado | `0` desliga o plugin |
-| `MULTIAGENTE_COTA_FALLBACKS` | vazio | `de/para;de/para`, ex.: `opencode/gpt-6-luna>opencode/hy4-flash-free` |
+| `MULTIAGENTE_COTA_FALLBACKS` | vazio | `origem>destino;origem>destino` (definido localmente) |
 | `MULTIAGENTE_COTA_RESERVA` | vazio | modelo usado quando não há fallback exato |
 | `MULTIAGENTE_COTA_COOLDOWN_MS` | `86400000` | tempo de bloqueio do modelo (24h) |
 | `MULTIAGENTE_COTA_AUTO` | ligado | `0` desliga a busca automática de alternativa |
