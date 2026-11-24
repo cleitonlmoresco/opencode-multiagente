@@ -1,9 +1,15 @@
 # opencode-multiagente
 
+[![Licença GPL-3.0](https://img.shields.io/badge/license-GPL--3.0-blue.svg)](LICENSE)
+
 Roster de agentes para o **OpenCode V2**: um maestro decompõe o pedido e delega
-para especialistas, cada um com modelo e fronteira próprios. O pacote inclui o
-contrato de handoff, a escada de modelos por custo, comandos prontos e um plugin
-de escalada automática por falhas de ferramenta.
+para especialistas, cada um com modelo e fronteira próprios. Inclui contrato de
+handoff, escada de modelos por custo, comandos prontos, escalada por falha de
+ferramenta, fallback automático por cota e uma **fonte única de regras** com
+links entre projetos.
+
+O maestro vem **desligado por padrão** no exemplo versionado: quem clona abre no
+agente `build`. Ative somente no seu `opencode.json` local (ver Instalação).
 
 Sem chave, token ou caminho pessoal versionado aqui. A autenticação fica no
 OpenCode (`opencode auth login`) ou em variáveis de ambiente.
@@ -16,9 +22,13 @@ OpenCode (`opencode auth login`) ou em variáveis de ambiente.
   revisão, auditoria e risco alto.
 - **Fronteiras claras**: quem edita não revisa; quem revisa não edita; quem
   pesquisa não promove achado a verdade.
-- **Escalada automática**: falha repetida de ferramenta sobe o modelo sozinha,
-  sem você perceber no meio da tarefa.
-- **Portátil**: é só uma pasta `.opencode/` mais um `opencode.example.json` (copie para `opencode.json` no projeto).
+- **Escalada automática**: falha repetida de ferramenta sobe o modelo sozinha.
+- **Anti-loop por cota**: `429`/`402`/`usage limit` não geram retry; após 2
+  falhas o especialista é bloqueado e o plugin procura alternativa gratuita ou
+  de outro provider.
+- **Fonte única**: `.opencode/` é canônico; outros projetos usam junctions e o
+  script `sincronizar-maestro.ps1` (com chave `autoAtualizacao`).
+- **Maestro opt-in**: o example versionado não ativa `default_agent`.
 
 ## Arquitetura
 
@@ -197,7 +207,8 @@ Edite `PROTOCOLO_AGENTES.md` (projeto) ou `INSTRUCOES_UNIVERSAIS.md` (globais), 
 ├── scripts/
 │   ├── sincronizar-maestro.ps1   # fonte unica / reparo de links
 │   ├── atualizar-maestro-local.ps1
-│   └── projetos-linkados.txt
+│   ├── projetos-linkados.txt
+│   └── config.json               # autoAtualizacao true/false
 ├── opencode.example.json
 ├── README.md
 ├── LICENSE
@@ -207,6 +218,8 @@ Edite `PROTOCOLO_AGENTES.md` (projeto) ou `INSTRUCOES_UNIVERSAIS.md` (globais), 
 │   └── PERSONALIZAR.md
 └── .opencode
     ├── PROTOCOLO_AGENTES.md      # contrato comum (instructions)
+    ├── INSTRUCOES_UNIVERSAIS.md  # regras mínimas globais
+    ├── atualizar-maestro.ps1     # gerado pelo script (opcional)
     ├── OPENROUTER_MODELOS.md     # modelos gratuitos e especializados
     ├── README.md                 # referência rápida
     ├── agents/                   # 9 agentes
@@ -225,6 +238,6 @@ Edite `PROTOCOLO_AGENTES.md` (projeto) ou `INSTRUCOES_UNIVERSAIS.md` (globais), 
   política de uso própria; não envie dado sensível para eles.
 - Os plugins só trocam o modelo da sessão; não enviam conteúdo para lugar nenhum.
 
-## Licença
++
 
 MIT.
