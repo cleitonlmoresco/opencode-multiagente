@@ -1,8 +1,6 @@
 {
   "$schema": "https://opencode.ai/config.json",
   "model": "nvidia/nvidia/nemotron-3-ultra-550b-a55b",
-  "default_agent": "maestro",
-  "instructions": [".opencode/PROTOCOLO_AGENTES.md"],
   "agents": {
     "title": { "model": "opencode/hy4-flash-free" },
     "explore": { "model": "opencode/hy4-flash-free" },

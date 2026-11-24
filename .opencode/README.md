@@ -1,7 +1,7 @@
 # Ambiente multiagente — referência rápida
 
 - Contrato comum: [`PROTOCOLO_AGENTES.md`](PROTOCOLO_AGENTES.md) — injetado via
-  `instructions`.
+  `instructions` **quando o maestro estiver ativado no projeto**.
 - Guias completos: [`../docs/COMO_USAR.md`](../docs/COMO_USAR.md),
   [`../docs/ARQUITETURA.md`](../docs/ARQUITETURA.md) e
   [`../docs/PERSONALIZAR.md`](../docs/PERSONALIZAR.md).

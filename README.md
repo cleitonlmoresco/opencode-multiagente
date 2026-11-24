@@ -59,7 +59,19 @@ e criar agentes, veja [`docs/PERSONALIZAR.md`](docs/PERSONALIZAR.md).
 1. Copie a pasta `.opencode/` para a raiz do projeto.
 2. Copie `opencode.example.json` para `opencode.json` e mescle com a
    configuração que já existir.
-3. Abra uma sessão nova (`/new`). O rodapé deve mostrar `maestro · <modelo>`.
+3. Abra uma sessão nova (`/new`). Por padrão o maestro **não** é ativado: a
+   sessão abre no agente `build`. O example.versionado não liga `default_agent`
+   nem `instructions`.
+
+Para ativar o maestro **somente na sua máquina**, acrescente ao `opencode.json`
+local (que é ignorado pelo git):
+
+```jsonc
+{
+  "default_agent": "maestro",
+  "instructions": [".opencode/PROTOCOLO_AGENTES.md"]
+}
+```
 
 ```powershell
 Copy-Item .opencode <destino> -Recurse
