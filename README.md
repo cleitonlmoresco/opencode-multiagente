@@ -155,10 +155,35 @@ explicitamente. O bloqueio é gravado em `ctx.storage`, então sobrevive a resta
 
 Teste focado: `node --test .opencode/plugins/cota/logica.test.mjs`.
 
+## Fonte única de regras (links)
+
+O `.opencode/` deste repo é a **fonte canônica**. Outros projetos não copiam as
+regras: eles as linkam por junction.
+
+```powershell
+# no repo (repara links e gera as instruções globais)
+powershell -ExecutionPolicy Bypass -File .\scripts\sincronizar-maestro.ps1
+
+# em qualquer projeto linkado (o link se autoatualiza)
+powershell -ExecutionPolicy Bypass -File .\.opencode\atualizar-maestro.ps1
+```
+
+- `scripts/sincronizar-maestro.ps1` — reconstrói os junctions, regera
+  `~/.config/opencode/INSTRUCOES_GLOBAIS.md` a partir do protocolo e instala o
+  comando local em cada projeto.
+- `scripts/projetos-linkados.txt` — um caminho de projeto por linha.
+Edite  `PROTOCOLO_AGENTES.md`, agentes, comandos ou plugins aqui e rode o script:
+  a mudança chega a todos os projetos linkados. Se uma pasta estiver travada, o
+  script sincroniza os arquivos por cópia e avisa.
+
 ## Estrutura
 
 ```text
 .
+├── scripts/
+│   ├── sincronizar-maestro.ps1   # fonte unica / reparo de links
+│   ├── atualizar-maestro-local.ps1
+│   └── projetos-linkados.txt
 ├── opencode.example.json
 ├── README.md
 ├── LICENSE
