@@ -172,6 +172,8 @@ powershell -ExecutionPolicy Bypass -File .\.opencode\atualizar-maestro.ps1
   `~/.config/opencode/INSTRUCOES_GLOBAIS.md` a partir de `INSTRUCOES_UNIVERSAIS.md`
   e instala o comando local em cada projeto.
 - `scripts/projetos-linkados.txt` — um caminho de projeto por linha.
+- `scripts/config.json` - `{ "autoAtualizacao": true }`. Mude para `false` (ou use
+  `MAESTRO_AUTO_UPDATE=0`) para impedir a regeneração de links e instruções.
 Edite `PROTOCOLO_AGENTES.md` (projeto) ou `INSTRUCOES_UNIVERSAIS.md` (globais), agentes, comandos ou plugins aqui e rode o script:
   a mudança chega a todos os projetos linkados. Se uma pasta estiver travada, o
   script sincroniza os arquivos por cópia e avisa.

@@ -1,6 +1,17 @@
 param([string]$Projeto = "")
 $ErrorActionPreference = "Stop"
 
+# Auto-atualizacao pode ser desligada em scripts/config.json ou por env.
+$auto = $true
+$cfgArquivo = Join-Path $PSScriptRoot "config.json"
+if (Test-Path $cfgArquivo) {
+  try {
+    $cfg = Get-Content $cfgArquivo -Raw | ConvertFrom-Json
+    if ($cfg.PSObject.Properties.Name -contains "autoAtualizacao") { $auto = [bool]$cfg.autoAtualizacao }
+  } catch { Write-Output "AVISO: config.json invalido; usando autoAtualizacao=true" }
+}
+if ($env:MAESTRO_AUTO_UPDATE -eq "0") { $auto = $false }
+if (-not $auto) { Write-Output "AUTO-ATUALIZACAO DESLIGADA"; exit 0 }
 $raiz = Split-Path -Parent $PSScriptRoot
 $fonte = Join-Path $raiz ".opencode"
 $cfgDir = Join-Path $env:USERPROFILE ".config\opencode"
